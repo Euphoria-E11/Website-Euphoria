@@ -756,6 +756,12 @@ opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;
 .alarm-banner .ic{flex:none;width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--jade),var(--jade-bg));display:flex;align-items:center;justify-content:center;color:#fff;}
 .alarm-banner .txt{flex:1;font-size:.82rem;color:var(--cream);font-weight:600;line-height:1.3;}
 </style>
+<!-- PWA Manifest & Meta Tags -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#A97D0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 </head>
 <body>
 <script>try{
@@ -2323,6 +2329,18 @@ refreshFromShared(false);
 setInterval(function(){ if(!unlocked) refreshFromShared(false); }, 4000);
 setInterval(updateDashboard, 30000);
 })();
+</script>
+<!-- Register Service Worker for PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(function(registration) {
+      console.log('✓ Service Worker berhasil didaftarkan:', registration.scope);
+    })
+    .catch(function(error) {
+      console.log('✗ Gagal mendaftarkan Service Worker:', error);
+    });
+}
 </script>
 </body>
 </html>
