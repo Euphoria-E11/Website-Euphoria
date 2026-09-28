@@ -636,7 +636,7 @@ display:flex;justify-content:center;padding:.5rem .8rem calc(.7rem + env(safe-ar
 }
 .bottom-nav-inner{
 pointer-events:auto;display:flex;align-items:center;gap:.35rem;width:100%;max-width:420px;
-background:rgba(252,248,236,.88);backdrop-filter:blur(14px);border:1px solid var(--line-strong);
+background:var(--surface);backdrop-filter:blur(14px);border:1px solid var(--line-strong);
 border-radius:24px;padding:.45rem;box-shadow:var(--shadow-3);
 }
 .nav-btn{
@@ -755,13 +755,55 @@ opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;
 .alarm-banner.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .alarm-banner .ic{flex:none;width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--jade),var(--jade-bg));display:flex;align-items:center;justify-content:center;color:#fff;}
 .alarm-banner .txt{flex:1;font-size:.82rem;color:var(--cream);font-weight:600;line-height:1.3;}
+
+/* spin */
+.spin-badge{margin:0 0 .8rem;text-align:center;font-size:.76rem;font-weight:700;color:var(--muted);}
+.wheel-wrap{position:relative;width:min(82vw,320px);aspect-ratio:1/1;margin:.5rem auto 1.2rem;}
+.wheel-rot{position:absolute;inset:0;border-radius:50%;background:var(--surface3);box-shadow:var(--shadow-3), 0 0 0 6px var(--surface3), 0 0 0 7px var(--line-strong);will-change:transform;}
+.wheel-rot canvas{width:100%;height:100%;display:block;border-radius:50%;}
+.wheel-hub{position:absolute;left:50%;top:50%;width:15%;height:15%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--surface),var(--surface3));border:2px solid var(--gold-soft);box-shadow:var(--shadow-2);z-index:2;}
+.wheel-pin{position:absolute;left:50%;top:-14px;width:0;height:0;transform:translateX(-50%);border-left:13px solid transparent;border-right:13px solid transparent;border-top:26px solid var(--gold);filter:drop-shadow(0 3px 3px rgba(0,0,0,.28));z-index:3;pointer-events:none;}
+.spin-result{text-align:center;margin:.9rem 0 .2rem;min-height:3.4rem;}
+.spin-result .lbl{font-size:.74rem;color:var(--muted);}
+.spin-result .win{font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem;color:var(--gold-soft);margin-top:.2rem;line-height:1.2;overflow-wrap:anywhere;}
+.spin-result.pop .win{animation:winPop .55s cubic-bezier(.3,1.6,.4,1);}
+@keyframes winPop{from{transform:scale(.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+.local-note{font-size:.7rem;color:var(--muted2);text-align:center;margin:.5rem 0 0;}
+.spin-mode-row{margin-bottom:.8rem;}
+.spin-count{font-size:.76rem;color:var(--muted);margin:.1rem 0 .6rem;}
+.spin-add{display:flex;gap:.5rem;align-items:stretch;}
+.spin-add textarea{flex:1;min-width:0;min-height:46px;max-height:120px;resize:vertical;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.75rem .85rem;font:500 16px "Plus Jakarta Sans",sans-serif;background:var(--bg2);color:var(--cream);}
+.chip-list{display:flex;flex-wrap:wrap;gap:.4rem;margin:.7rem 0 .2rem;}
+.chip{display:inline-flex;align-items:center;gap:.35rem;background:var(--surface3);border:1px solid var(--line-strong);border-radius:999px;padding:.28rem .32rem .28rem .7rem;font-size:.78rem;font-weight:600;color:var(--cream);max-width:100%;}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chip button{flex:none;border:0;background:rgba(var(--accent-rgb),.16);color:var(--gold-dim);width:24px;height:24px;border-radius:50%;cursor:pointer;font-weight:800;line-height:1;}
+.spin-lock{text-align:center;}
+.spin-lock p{margin:.2rem 0 .8rem;}
+@media (prefers-reduced-motion:reduce){.spin-result.pop .win{animation:none;}}
+/* polling */
+.poll-card{padding:1.1rem 1.1rem 1rem;}
+.poll-q{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--cream);margin:0 0 .2rem;}
+.poll-meta{font-size:.7rem;color:var(--muted);margin:0 0 .8rem;}
+.poll-opt{position:relative;overflow:hidden;width:100%;text-align:left;border:1px solid var(--line-strong);background:var(--bg2);color:var(--cream);border-radius:var(--r-sm);padding:.85rem .95rem;margin-bottom:.55rem;font:600 .9rem 'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:.6rem;transition:border-color .15s ease, transform .1s ease;}
+.poll-opt:active{transform:scale(.985);}
+.poll-opt .bar{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(var(--accent-rgb),.28),rgba(var(--accent-rgb),.12));transition:width .5s cubic-bezier(.22,.9,.3,1);z-index:0;}
+.poll-opt .t,.poll-opt .n{position:relative;z-index:1;}
+.poll-opt .t{flex:1;}
+.poll-opt .n{font-size:.78rem;font-weight:800;color:var(--gold-soft);}
+.poll-opt.mine{border-color:var(--gold);box-shadow:0 0 0 2px rgba(var(--accent-rgb),.22);}
+.poll-opt.locked{opacity:.55;cursor:not-allowed;}
+.name-gate{background:var(--surface3);border:1px dashed var(--line-strong);border-radius:var(--r-sm);padding:.75rem;margin-bottom:.7rem;}
+.name-gate p{margin:0 0 .45rem;font-size:.78rem;font-weight:700;color:var(--cream);}
+.name-gate input{margin-bottom:.5rem;}
+.who-row{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;color:var(--muted);margin-bottom:.6rem;}
+.opt-input-row{display:flex;gap:.5rem;margin-bottom:.55rem;}
+.opt-input-row input{margin:0 !important;flex:1;padding:.85rem .9rem !important;font-size:16px;}
+.opt-input-row button{width:48px;flex:none;border:1px solid var(--line-strong);background:var(--surface2);color:var(--warn);border-radius:var(--r-sm);font-size:1.1rem;font-weight:800;cursor:pointer;}
+.btn-add-option{width:100%;min-height:56px;font-size:1rem !important;font-weight:800 !important;padding:1rem !important;border-radius:var(--r-md) !important;border:2px dashed var(--gold) !important;background:rgba(var(--accent-rgb),.1) !important;color:var(--gold-soft) !important;margin:.2rem 0 .9rem;letter-spacing:.01em;}
+#pollQInput{width:100%;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.85rem .9rem;font-size:16px;margin-bottom:.7rem;background:var(--bg2);color:var(--cream);}
+#voterNameInput{width:100%;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.7rem .8rem;font-size:16px;background:var(--bg2);color:var(--cream);}
+#spinListText{width:100%;min-height:120px;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.65rem .8rem;font-size:16px;background:var(--bg2);color:var(--cream);margin-bottom:.6rem;}
 </style>
-<!-- PWA Manifest & Meta Tags -->
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#A97D0C">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
 </head>
 <body>
 <script>try{
@@ -838,6 +880,14 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 <span class="tile-body"><span class="tile-label">Bagi Kelompok</span><span class="tile-sub">Per mata pelajaran</span></span>
 </button>
 
+<button class="bento-tile rippleable tilt" data-tab="spin" style="--tc1:#E0729A;--tc2:#B23C6B;">
+<span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3.5"/></svg></span>
+<span class="tile-body"><span class="tile-label">Spin</span><span class="tile-sub">Acak siapa saja</span></span>
+</button>
+<button class="bento-tile rippleable tilt" data-tab="polling" style="--tc1:#6FA995;--tc2:#3E7A66;">
+<span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
+<span class="tile-body"><span class="tile-label">Polling</span><span class="tile-sub">Suara kelas</span></span>
+</button>
 <button class="bento-tile wide rippleable tilt" data-tab="jadwal" style="--tc1:#D98C63;--tc2:#BE6C46;">
 <span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="5" width="17" height="15.5" rx="2.4"/><path d="M3.5 9.6h17"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span>
 <span class="tile-body"><span class="tile-label">Jadwal Pelajaran</span><span class="tile-sub" id="tileJadwalSub">Senin – Sabtu</span></span>
@@ -1068,6 +1118,65 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 </div>
 </section>
 
+<section class="tab-panel" id="tab-spin">
+<div class="sub-head"><button class="back-btn rippleable" data-goto="home" aria-label="Kembali ke menu">‹</button><h2>Spin</h2></div>
+<div class="opt-row spin-mode-row" id="spinTabRow">
+<button class="opt-btn rippleable" data-stab="admin">Mode Admin</button>
+<button class="opt-btn rippleable active" data-stab="pribadi">Mode Pribadi</button>
+</div>
+<div class="card">
+<p class="spin-badge" id="spinBadge"></p>
+<div class="wheel-wrap" id="wheelWrap">
+<div class="wheel-pin"></div>
+<div class="wheel-rot" id="wheelRot"><canvas id="wheelCanvas" aria-label="Roda spin"></canvas></div>
+<div class="wheel-hub"></div>
+</div>
+<button class="primary rippleable" id="btnDoSpin">Putar</button>
+<div class="spin-result" id="spinResult" aria-live="polite"><div class="lbl">Hasil</div><div class="win">—</div></div>
+<p class="local-note" id="spinNote"></p>
+</div>
+<div class="card spin-lock" id="spinLockCard" style="display:none;">
+<h2>Ubah roda untuk semua perangkat</h2>
+<p class="sub">Masuk sebagai admin untuk mengatur isi roda dan memutar hasil yang tampil di semua perangkat.</p>
+<button class="ghost rippleable" id="btnSpinUnlock">Masuk sebagai admin</button>
+</div>
+<div class="card" id="spinAdminCard" style="display:none;">
+<h2 id="spinEditTitle">Isi roda</h2>
+<p class="sub" id="spinEditSub"></p>
+<div class="opt-row" id="spinSrcRow">
+<button class="opt-btn rippleable" data-src="L">Laki-laki</button>
+<button class="opt-btn rippleable" data-src="P">Perempuan</button>
+<button class="opt-btn rippleable" data-src="C">Campur</button>
+<button class="opt-btn rippleable" data-src="X">Custom</button>
+</div>
+<p class="spin-count" id="spinCount"></p>
+<div class="spin-add">
+<textarea id="spinAddInput" rows="1" placeholder="Tambah nama atau alias" autocomplete="off" spellcheck="false"></textarea>
+<button class="ghost rippleable" id="btnSpinAdd">Tambah</button>
+</div>
+<p class="sub" style="margin:.4rem 0 0;">Bisa tempel banyak sekaligus, pisahkan dengan koma atau baris baru.</p>
+<div class="chip-list" id="spinChips"></div>
+<div class="btn-row">
+<button class="ghost rippleable" id="btnSpinClear" style="flex:1;">Hapus tambahan</button>
+<button class="primary rippleable" id="btnSpinSave" style="flex:1;">Bagikan ke semua</button>
+</div>
+<p class="status-msg" id="statusMsgSpin"></p>
+</div>
+</section>
+
+<section class="tab-panel" id="tab-polling">
+<div class="sub-head"><button class="back-btn rippleable" data-goto="home" aria-label="Kembali ke menu">‹</button><h2>Polling</h2></div>
+<div class="card" id="pollAddCard" style="display:none;">
+<h2>Buat polling</h2>
+<input type="text" id="pollQInput" placeholder="Pertanyaan polling">
+<div id="pollOptRows"></div>
+<button class="ghost rippleable btn-add-option" id="btnAddOpt">+ Tambah pilihan</button>
+<button class="primary rippleable" id="btnCreatePoll">Buat Polling</button>
+<p class="status-msg" id="statusMsgPoll"></p>
+</div>
+<div id="pollList"></div>
+</section>
+
 <section class="tab-panel" id="tab-jadwal">
 <div class="sub-head"><button class="back-btn rippleable" data-goto="home" aria-label="Kembali ke menu">‹</button><h2>Jadwal Pelajaran</h2></div>
 <div class="card">
@@ -1086,16 +1195,18 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 <nav class="bottom-nav">
 <div class="bottom-nav-inner">
 <button class="nav-btn rippleable active" data-tab="home"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5a1 1 0 0 0 1 1h3.2v-5.4h3.6v5.4H17a1 1 0 0 0 1-1V10"/></svg></span>Beranda</button>
-<button class="nav-btn rippleable" data-tab="peserta"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="8" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M14.5 20c.3-2.7 2.3-4.8 4.9-4.8s4.4 1.8 4.9 4.3"/></svg></span>Peserta</button>
-<button class="nav-btn rippleable" data-tab="denah"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/></svg></span>Denah</button>
-<button class="nav-btn rippleable" data-tab="kelompok"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.5c2.6.4 4.6 2.4 5 5"/></svg></span>Kelompok</button>
-<button class="nav-btn rippleable" id="btnMore"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.4 2.4M15.6 15.6 18 18M6 18l2.4-2.4M15.6 8.4 18 6"/></svg></span>Lainnya</button>
+<button class="nav-btn rippleable" data-tab="spin"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg></span>Spin</button>
+<button class="nav-btn rippleable" data-tab="denah"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/></svg></span>Denah Kelas</button>
+<button class="nav-btn rippleable" id="btnMore"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.4 2.4M15.6 15.6 18 18M6 18l2.4-2.4M15.6 8.4 18 6"/></svg></span>Lainnya</button>
 </div>
 </nav>
 
 <div class="sheet-bg" id="moreSheet">
 <div class="sheet">
 <div class="sheet-handle"></div>
+<div class="sheet-item rippleable" data-tab="polling"><span class="tile-icon" style="--tc1:#6FA995;--tc2:#3E7A66;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span><span class="tile-label">Polling</span></div>
+<div class="sheet-item rippleable" data-tab="peserta"><span class="tile-icon" style="--tc1:#E8C971;--tc2:#C9A227;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="8" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M14.5 20c.3-2.7 2.3-4.8 4.9-4.8s4.4 1.8 4.9 4.3"/></svg></span><span class="tile-label">Peserta</span></div>
+<div class="sheet-item rippleable" data-tab="kelompok"><span class="tile-icon" style="--tc1:#C58694;--tc2:#9C5A66;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span><span class="tile-label">Bagi Kelompok</span></div>
 <div class="sheet-item rippleable" data-tab="tugas"><span class="tile-icon" style="--tc1:#7FB79A;--tc2:#4C9179;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/></svg></span><span class="tile-label">Tugas & Deadline</span></div>
 <div class="sheet-item rippleable" data-tab="jadwal"><span class="tile-icon" style="--tc1:#D98C63;--tc2:#BE6C46;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3.5" y="5" width="17" height="15.5" rx="2.4"/><path d="M3.5 9.6h17"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span class="tile-label">Jadwal Pelajaran</span></div>
 <div class="sheet-item rippleable" data-tab="countdown"><span class="tile-icon" style="--tc1:#E8C971;--tc2:#C9A227;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 3h12"/><path d="M6 21h12"/><path d="M7 3c0 4.5 3 6 5 7-2 1-5 2.5-5 7"/><path d="M17 3c0 4.5-3 6-5 7 2 1 5 2.5 5 7"/></svg></span><span class="tile-label">Countdown</span></div>
@@ -1160,8 +1271,7 @@ Gelap
 
 <script>
 (function(){
-var EDIT_PIN = "1108";
-var BACKEND_URL = "https://script.google.com/macros/s/AKfycbxVD41q0cY45nabtUvJra8B8KCkR6SkhRzZIBd-cStchNq4c6zWdrcqufAWnA0ESgxW0g/exec";
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbyrOLh62KCgt1tsRGMW4kbyrl0kgzhakhVQje-NG2rWseX2jOsDGwmgjirVgqrgbSsaAw/exec";
 var SHARED_KEY = "xe11-app-state-v1";
 var HIST_KEY = "xe11-app-hist-v1";
 var unlocked = false;
@@ -1215,7 +1325,11 @@ assignments: JSON.parse(JSON.stringify(defaultAssignments)),
 groupsBySubject: {},
 infoItems: [],
 countdowns: [],
-tasks: []
+tasks: [],
+spinItems: [],
+spinCfg: null,
+spinLast: null,
+polls: []
 };
 var history = [];
 var currentSubject = "Matematika";
@@ -1736,6 +1850,7 @@ box.appendChild(row);
 });
 }
 updateDashboard();
+renderExtra();
 }
 document.getElementById('btnAddTask').addEventListener('click', function(){
 if(!unlocked) return;
@@ -2048,18 +2163,23 @@ state.groupsBySubject = s.groupsBySubject || state.groupsBySubject;
 state.infoItems = s.infoItems || state.infoItems;
 state.countdowns = s.countdowns || state.countdowns;
 state.tasks = s.tasks || state.tasks;
+state.spinItems = s.spinItems || state.spinItems;
+state.spinCfg = s.spinCfg || state.spinCfg;
+state.spinLast = s.spinLast || state.spinLast;
+state.polls = s.polls || state.polls;
 syncGroupControlsUI();
 }
 if(hTxt){ history = JSON.parse(hTxt) || []; }
 renderStudents(); renderDesks(); renderGroups(); renderHistory();
 renderInfo(); renderCountdowns(); renderTasks(); updateDashboard();
+renderExtra();
 if(showMsg){ showStatus('statusMsgDenah','Data diperbarui.','ok'); showStatus('statusMsgKelompok','Data diperbarui.','ok'); }
 });
 }
 // tabs / nav / sheet
 function switchTab(name){
 Array.prototype.forEach.call(document.querySelectorAll('.tab-panel'), function(p){ p.classList.toggle('active', p.id==='tab-'+name); });
-var moreTabs = ['riwayat','info','countdown','tugas','jadwal','galeri'];
+var moreTabs = ['peserta','kelompok','riwayat','info','countdown','tugas','jadwal','galeri','polling'];
 Array.prototype.forEach.call(document.querySelectorAll('.nav-btn[data-tab]'), function(b){
 b.classList.toggle('active', b.getAttribute('data-tab')===name);
 });
@@ -2122,6 +2242,8 @@ document.getElementById('settingsCard').style.display = on?'':'none';
 document.getElementById('infoAddCard').style.display = on?'':'none';
 document.getElementById('cdAddCard').style.display = on?'':'none';
 document.getElementById('taskAddCard').style.display = on?'':'none';
+renderSpin();
+document.getElementById('pollAddCard').style.display = on?'':'none';
 }
 document.getElementById('lockBtn').addEventListener('click', function(){
 if(unlocked){
@@ -2140,7 +2262,11 @@ pinModal.classList.add('show');
 document.getElementById('btnCancelPin').addEventListener('click', function(){ pinModal.classList.remove('show'); });
 function tryUnlock(){
 var val=document.getElementById('pinInput').value.trim();
-if(val===EDIT_PIN){
+var msgEl = document.getElementById('pinMsg');
+
+const ADMIN_PIN = "1108";
+
+if(val===ADMIN_PIN){
 unlocked=true;
 pinModal.classList.remove('show');
 document.getElementById('lockBtn').textContent='Admin';
@@ -2148,9 +2274,12 @@ document.getElementById('lockBtn').classList.add('on');
 setEditUI(true);
 renderStudents(); renderDesks(); renderHistory(); syncGroupControlsUI();
 renderInfo(); renderCountdowns(); renderTasks();
+msgEl.textContent='';
 } else {
-document.getElementById('pinMsg').className='status-msg error';
-document.getElementById('pinMsg').textContent='PIN salah, coba lagi.';
+msgEl.className='status-msg error';
+msgEl.textContent='PIN salah, coba lagi.';
+document.getElementById('pinInput').value='';
+document.getElementById('pinInput').focus();
 }
 }
 document.getElementById('btnSubmitPin').addEventListener('click', tryUnlock);
@@ -2292,6 +2421,332 @@ b.addEventListener('click', function(e){ applyScheme(b.getAttribute('data-scheme
 });
 syncPickerUI();
 })();
+
+// ===== spin (roda) & polling =====
+var spinning=false, spinRot=0, spinSig='', seenTs=0;
+var LS_TAB='xe11-spin-tab', LS_PERS='xe11-spin-personal';
+var spinTab = (function(){ try{ return localStorage.getItem(LS_TAB)==='admin' ? 'admin' : 'pribadi'; }catch(e){ return 'pribadi'; } })();
+var personal = (function(){
+try{ var o=JSON.parse(localStorage.getItem(LS_PERS)||'null'); if(o && o.src) return {src:o.src, extra:Array.isArray(o.extra)?o.extra:[]}; }catch(e){}
+return {src:'C', extra:[]};
+})();
+var adminDraft=null, adminDirty=false, resPers='', resAdmin='';
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function sharedCfg(){
+var c=state.spinCfg;
+if(c && c.src) return {src:c.src, extra:Array.isArray(c.extra)?c.extra.slice():[]};
+if((state.spinItems||[]).length) return {src:'X', extra:state.spinItems.slice()};
+return {src:'C', extra:[]};
+}
+function editCfg(){
+if(spinTab==='pribadi') return personal;
+if(unlocked){ if(!adminDraft) adminDraft=sharedCfg(); return adminDraft; }
+return sharedCfg();
+}
+function namesFor(src){
+var arr=(state.students||[]).filter(function(s){ return s.hadir!==false; });
+if(src==='L') arr=arr.filter(function(s){ return s.g==='L'; });
+else if(src==='P') arr=arr.filter(function(s){ return s.g==='P'; });
+else if(src==='X') arr=[];
+return arr.slice().sort(function(a,b){ return a.no-b.no; }).map(function(s){ return s.name; });
+}
+function resolveList(cfg){
+return namesFor(cfg.src).concat(cfg.extra).filter(function(x){ return x && String(x).trim(); });
+}
+function activeItems(){ return resolveList(editCfg()); }
+function persistCfg(){
+if(spinTab==='pribadi') lsSet(LS_PERS, JSON.stringify(personal));
+else adminDirty=true;
+}
+function commitAdmin(showMsg){
+var cfg=editCfg();
+state.spinCfg={src:cfg.src, extra:cfg.extra.slice()};
+state.spinItems=resolveList(cfg);
+adminDirty=false;
+save();
+if(showMsg) showStatus('statusMsgSpin','Roda dibagikan ke semua perangkat ('+state.spinItems.length+' pilihan).','ok');
+}
+// ---- gambar roda ----
+function lum(hex){
+var m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return .5;
+var n=parseInt(m[1],16), r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+return .2126*r+.7152*g+.0722*b;
+}
+function wheelPalette(){
+var cs=getComputedStyle(document.documentElement);
+return ['--gold-soft','--jade','--rust','--rose','--gold','--gold-dim'].map(function(v){ return cs.getPropertyValue(v).trim() || '#A97D0C'; });
+}
+function shortLabel(t,n){
+t=String(t);
+if(n>10 && t.indexOf(' ')>0) t=t.split(' ')[0];
+return t;
+}
+function drawWheel(items){
+var cv=document.getElementById('wheelCanvas'); if(!cv) return;
+var box=cv.parentNode, size=box.clientWidth; if(!size) return;
+var dpr=Math.min(window.devicePixelRatio||1,2.5);
+cv.width=cv.height=Math.round(size*dpr);
+var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size,size);
+var cs=getComputedStyle(document.documentElement);
+var cx=size/2, cy=size/2, R=size/2-1, n=items.length;
+var font="'Plus Jakarta Sans',sans-serif";
+if(n<2){
+ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle=cs.getPropertyValue('--surface3').trim()||'#eee'; ctx.fill();
+ctx.setLineDash([6,6]); ctx.lineWidth=2; ctx.strokeStyle=cs.getPropertyValue('--line-strong').trim()||'#999';
+ctx.beginPath(); ctx.arc(cx,cy,R-14,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+ctx.fillStyle=cs.getPropertyValue('--muted').trim()||'#666'; ctx.textAlign='center'; ctx.textBaseline='middle';
+ctx.font='600 14px '+font;
+ctx.fillText('Tambah minimal 2 pilihan',cx,cy-58);
+return;
+}
+var pal=wheelPalette(), a=Math.PI*2/n, start=-Math.PI/2;
+for(var i=0;i<n;i++){
+var ci=i%pal.length; if(i===n-1 && ci===0 && n>1) ci=3;
+var col=pal[ci];
+ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,R,start+i*a,start+(i+1)*a); ctx.closePath();
+ctx.fillStyle=col; ctx.fill();
+ctx.lineWidth=1.5; ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.stroke();
+}
+var fs=Math.min(15, a*R*.42);
+if(fs>=7 && n<=60){
+var maxW=R*.66;
+for(var j=0;j<n;j++){
+var cj=j%pal.length; if(j===n-1 && cj===0 && n>1) cj=3;
+ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+(j+.5)*a);
+ctx.textAlign='right'; ctx.textBaseline='middle';
+ctx.font='700 '+fs.toFixed(1)+'px '+font;
+ctx.fillStyle = lum(pal[cj])>.55 ? '#1B1608' : '#FFFFFF';
+var t=shortLabel(items[j],n);
+if(ctx.measureText(t).width>maxW){ while(t.length>1 && ctx.measureText(t+'…').width>maxW) t=t.slice(0,-1); t=t+'…'; }
+ctx.fillText(t,R-12,0);
+ctx.restore();
+}
+}
+}
+// ---- putar ----
+function setResult(label,name,pop){
+var res=document.getElementById('spinResult');
+res.classList.remove('pop');
+res.innerHTML='<div class="lbl">'+esc(label)+'</div><div class="win">'+esc(name)+'</div>';
+if(pop){ void res.offsetWidth; res.classList.add('pop'); }
+}
+function runSpin(items,w,fromAdmin){
+if(spinning || items.length<2) return;
+spinning=true;
+var btn=document.getElementById('btnDoSpin'); btn.disabled=true; btn.style.opacity=.6;
+setResult('Memutar…','…',false);
+var n=items.length, a=Math.PI*2/n, full=Math.PI*2;
+var want=-(w+.5)*a+(Math.random()-.5)*a*.7;
+var cur=spinRot%full;
+var delta=(((want-cur)%full)+full)%full;
+spinRot=spinRot+(5+Math.floor(Math.random()*2))*full+delta;
+var el=document.getElementById('wheelRot');
+el.style.transition='transform 4.6s cubic-bezier(.12,.72,.14,1)';
+el.style.transform='rotate('+spinRot+'rad)';
+if(navigator.vibrate) navigator.vibrate(25);
+setTimeout(function(){
+spinning=false;
+var name=items[w];
+if(spinTab==='admin'){ resAdmin=name; } else { resPers=name; }
+setResult(spinTab==='admin' ? 'Hasil admin' : 'Terpilih', name, true);
+if(navigator.vibrate) navigator.vibrate([50,40,50]);
+if(fromAdmin){ state.spinLast={ts:Date.now(), idx:w, name:name}; seenTs=state.spinLast.ts; save(); }
+renderSpin();
+}, 4700);
+}
+function doSpin(){
+if(spinning) return;
+if(spinTab==='admin' && !unlocked) return;
+if(spinTab==='admin' && adminDirty) commitAdmin(false);
+var items=activeItems();
+if(items.length<2) return;
+runSpin(items, Math.floor(Math.random()*items.length), spinTab==='admin');
+}
+// ---- UI ----
+function fmtTime(ts){ try{ return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+function syncSpinUI(){
+var isAdmin=spinTab==='admin', canEdit=!isAdmin || unlocked, cfg=editCfg();
+Array.prototype.forEach.call(document.querySelectorAll('#spinTabRow .opt-btn'), function(b){ b.classList.toggle('active', b.getAttribute('data-stab')===spinTab); });
+Array.prototype.forEach.call(document.querySelectorAll('#spinSrcRow .opt-btn'), function(b){ b.classList.toggle('active', b.getAttribute('data-src')===cfg.src); });
+document.getElementById('spinLockCard').style.display = (isAdmin && !unlocked) ? '' : 'none';
+document.getElementById('spinAdminCard').style.display = canEdit ? '' : 'none';
+document.getElementById('btnSpinSave').style.display = isAdmin ? '' : 'none';
+document.getElementById('btnSpinClear').style.flex = isAdmin ? '1' : '1 1 100%';
+document.getElementById('spinBadge').textContent = !isAdmin ? 'Mode pribadi: hanya berlaku di perangkat ini'
+: (unlocked ? 'Mode admin: hasil dan daftar dibagikan ke semua perangkat' : 'Mode admin: dilihat dari perangkat ini');
+document.getElementById('spinNote').textContent = !isAdmin ? 'Daftar dan hasil tersimpan di perangkatmu saja.'
+: (unlocked ? 'Yang kamu putar tampil di semua perangkat.' : 'Hanya admin yang bisa memutar di mode ini.');
+document.getElementById('spinEditTitle').textContent = isAdmin ? 'Isi roda admin' : 'Isi roda pribadi';
+document.getElementById('spinEditSub').textContent = isAdmin
+? 'Pilih sumber nama, tambah apa saja, lalu bagikan. Semua perangkat ikut berubah.'
+: 'Pilih sumber nama dan tambah apa saja. Tidak memengaruhi perangkat lain.';
+var base=namesFor(cfg.src).length, total=base+cfg.extra.length;
+document.getElementById('spinCount').textContent = total+' pilihan ('+base+' dari daftar kelas, '+cfg.extra.length+' tambahan)'+(isAdmin && adminDirty ? ' · belum dibagikan' : '');
+var box=document.getElementById('spinChips'); box.innerHTML='';
+cfg.extra.forEach(function(t,i){
+var c=document.createElement('span'); c.className='chip';
+var s=document.createElement('span'); s.textContent=t; c.appendChild(s);
+var x=document.createElement('button'); x.type='button'; x.setAttribute('aria-label','Hapus '+t); x.textContent='✕';
+x.addEventListener('click',function(){ if(spinning) return; cfg.extra.splice(i,1); persistCfg(); renderSpin(); });
+c.appendChild(x); box.appendChild(c);
+});
+var btn=document.getElementById('btnDoSpin');
+var items=resolveList(cfg);
+btn.style.display = (isAdmin && !unlocked) ? 'none' : '';
+btn.disabled = items.length<2 || spinning;
+btn.style.opacity = btn.disabled ? .5 : 1;
+}
+function renderSpin(){
+if(spinning) return;
+if(!unlocked && adminDraft){ adminDraft=null; adminDirty=false; }
+syncSpinUI();
+var items=activeItems(), sig=spinTab+'|'+items.join('\u0001');
+var el=document.getElementById('wheelRot'); if(!el) return;
+if(sig!==spinSig){ spinSig=sig; spinRot=0; el.style.transition='none'; el.style.transform='rotate(0rad)'; }
+drawWheel(items);
+var panel=document.getElementById('tab-spin');
+var last=state.spinLast;
+if(spinTab==='admin' && !unlocked && last && last.ts>seenTs){
+if(items.length>=2 && panel.classList.contains('active') && Date.now()-last.ts<25000){
+seenTs=last.ts;
+var idx=items.indexOf(last.name); if(idx<0) idx=Math.min(last.idx||0, items.length-1);
+runSpin(items, idx, false);
+return;
+}
+if(!panel.classList.contains('active') && Date.now()-last.ts<25000) return;
+seenTs=last.ts;
+}
+var name = spinTab==='admin' ? (resAdmin || (last ? last.name : '')) : resPers;
+if(name){ setResult(spinTab==='admin' ? (last && name===last.name && !unlocked ? 'Hasil admin, '+fmtTime(last.ts) : 'Hasil admin') : 'Terpilih', name, false); }
+else setResult('Hasil','—',false);
+}
+function renderExtra(){ renderSpin(); renderPolls(); }
+function addExtras(raw){
+var cfg=editCfg();
+var parts=String(raw).split(/[\n,;]+/).map(function(x){ return x.trim().slice(0,40); }).filter(Boolean);
+if(!parts.length) return false;
+parts.forEach(function(p){ if(cfg.extra.length<200) cfg.extra.push(p); });
+persistCfg(); return true;
+}
+Array.prototype.forEach.call(document.querySelectorAll('#spinTabRow .opt-btn'), function(b){
+b.addEventListener('click', function(){
+if(spinning) return;
+spinTab=b.getAttribute('data-stab'); try{ localStorage.setItem(LS_TAB,spinTab); }catch(e){}
+document.getElementById('statusMsgSpin').textContent='';
+renderSpin();
+});
+});
+Array.prototype.forEach.call(document.querySelectorAll('#spinSrcRow .opt-btn'), function(b){
+b.addEventListener('click', function(){
+if(spinning || (spinTab==='admin' && !unlocked)) return;
+editCfg().src=b.getAttribute('data-src'); persistCfg(); renderSpin();
+});
+});
+function onAdd(){
+if(spinning || (spinTab==='admin' && !unlocked)) return;
+var inp=document.getElementById('spinAddInput');
+if(addExtras(inp.value)){ inp.value=''; renderSpin(); }
+inp.focus();
+}
+document.getElementById('btnSpinAdd').addEventListener('click', onAdd);
+document.getElementById('spinAddInput').addEventListener('keydown', function(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); onAdd(); } });
+document.getElementById('btnSpinClear').addEventListener('click', function(){
+if(spinning || (spinTab==='admin' && !unlocked)) return;
+editCfg().extra=[]; persistCfg(); renderSpin();
+});
+document.getElementById('btnSpinSave').addEventListener('click', function(){
+if(!unlocked || spinTab!=='admin' || spinning) return;
+if(resolveList(editCfg()).length<2){ showStatus('statusMsgSpin','Isi minimal 2 pilihan dulu.','error'); return; }
+commitAdmin(true); renderSpin();
+});
+document.getElementById('btnSpinUnlock').addEventListener('click', function(){ document.getElementById('lockBtn').click(); });
+document.getElementById('btnDoSpin').addEventListener('click', doSpin);
+document.addEventListener('click', function(e){
+var t=e.target.closest && e.target.closest('[data-tab="spin"]');
+if(t) setTimeout(renderSpin, 40);
+});
+if(window.ResizeObserver){
+var ww=document.getElementById('wheelWrap');
+if(ww) new ResizeObserver(function(){ if(!spinning) drawWheel(activeItems()); }).observe(ww);
+}
+new MutationObserver(function(){ if(!spinning) drawWheel(activeItems()); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-scheme','data-mode']});
+// polling
+var pollDraft=['',''];
+function voterName(){ try{return localStorage.getItem('xe11-voter')||'';}catch(e){return '';} }
+function setVoterName(n){ try{localStorage.setItem('xe11-voter',n);}catch(e){} }
+function pollCounts(p){
+var c={}, total=0; p.options.forEach(function(o){c[o.id]=0;});
+Object.keys(p.voters||{}).forEach(function(k){ var o=p.voters[k].o; if(c[o]!==undefined){c[o]++; total++;} });
+return {c:c,total:total};
+}
+function renderPolls(){
+var box=document.getElementById('pollList');
+if(!box) return;
+if(box.contains(document.activeElement) && document.activeElement.tagName==='INPUT') return;
+var name=voterName();
+if(!state.polls.length){ box.innerHTML='<p class="empty-note">Belum ada polling.</p>'; return; }
+box.innerHTML='';
+state.polls.slice().sort(function(a,b){return b.ts-a.ts;}).forEach(function(p){
+var card=document.createElement('div'); card.className='card poll-card';
+var key=name.toLowerCase();
+var mine=name && p.voters && p.voters[key] ? p.voters[key].o : null;
+var pc=pollCounts(p);
+var head='<div style="display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start;"><div><p class="poll-q">'+esc(p.q)+'</p><p class="poll-meta">'+pc.total+' suara · '+esc(p.time)+'</p></div>'+(unlocked?'<button class="pdel" aria-label="Hapus polling" style="flex:none;border:1px solid var(--line-strong);background:var(--surface2);color:var(--warn);border-radius:8px;min-width:38px;min-height:38px;cursor:pointer;font-weight:800;">✕</button>':'')+'</div>';
+card.innerHTML=head;
+if(unlocked) card.querySelector('.pdel').addEventListener('click',function(){ state.polls=state.polls.filter(function(x){return x.id!==p.id;}); save(); renderPolls(); });
+if(!name){
+var g=document.createElement('div'); g.className='name-gate';
+g.innerHTML='<p>Isi namamu dulu sebelum memilih</p><input type="text" class="gate-in" placeholder="Nama lengkap / panggilan" maxlength="40"><button class="primary rippleable" style="padding:.7rem;">Lanjut</button>';
+var go=function(){ var v=g.querySelector('input').value.trim(); if(!v){ g.querySelector('input').focus(); return; } setVoterName(v); renderPolls(); };
+g.querySelector('button').addEventListener('click',go);
+g.querySelector('input').addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
+card.appendChild(g);
+} else {
+var w=document.createElement('div'); w.className='who-row';
+w.innerHTML='<span>Memilih sebagai <b style="color:var(--cream)">'+esc(name)+'</b></span><button class="manage-link" style="font-size:.72rem;">Ganti nama</button>';
+w.querySelector('button').addEventListener('click',function(){ try{localStorage.removeItem('xe11-voter');}catch(e){} renderPolls(); });
+card.appendChild(w);
+}
+p.options.forEach(function(o){
+var pct=pc.total? Math.round(pc.c[o.id]/pc.total*100):0;
+var b=document.createElement('button');
+b.className='poll-opt'+(mine===o.id?' mine':'')+(name?'':' locked');
+b.innerHTML='<span class="bar" style="width:'+pct+'%"></span><span class="t">'+esc(o.t)+(mine===o.id?' ✓':'')+'</span><span class="n">'+pc.c[o.id]+' · '+pct+'%</span>';
+b.addEventListener('click',function(){
+if(!voterName()){ var gi=card.querySelector('.gate-in'); if(gi) gi.focus(); return; }
+p.voters=p.voters||{};
+p.voters[voterName().toLowerCase()]={n:voterName(),o:o.id};
+save(); renderPolls();
+});
+card.appendChild(b);
+});
+box.appendChild(card);
+});
+}
+function renderPollDraft(){
+var box=document.getElementById('pollOptRows'); if(!box) return;
+box.innerHTML='';
+pollDraft.forEach(function(v,i){
+var row=document.createElement('div'); row.className='opt-input-row';
+row.innerHTML='<input type="text" placeholder="Pilihan '+(i+1)+'" value="'+esc(v)+'" maxlength="80">'+(pollDraft.length>2?'<button aria-label="Hapus pilihan">✕</button>':'');
+row.querySelector('input').addEventListener('input',function(e){ pollDraft[i]=e.target.value; });
+var bt=row.querySelector('button'); if(bt) bt.addEventListener('click',function(){ pollDraft.splice(i,1); renderPollDraft(); });
+box.appendChild(row);
+});
+}
+document.getElementById('btnAddOpt').addEventListener('click',function(){ if(!unlocked) return; if(pollDraft.length>=10){ showStatus('statusMsgPoll','Maksimal 10 pilihan.','error'); return; } pollDraft.push(''); renderPollDraft(); var ins=document.querySelectorAll('#pollOptRows input'); ins[ins.length-1].focus(); });
+document.getElementById('btnCreatePoll').addEventListener('click',function(){
+if(!unlocked) return;
+var q=document.getElementById('pollQInput').value.trim();
+var opts=pollDraft.map(function(x){return x.trim();}).filter(Boolean);
+if(!q){ showStatus('statusMsgPoll','Isi pertanyaan dulu.','error'); return; }
+if(opts.length<2){ showStatus('statusMsgPoll','Minimal 2 pilihan.','error'); return; }
+state.polls.push({id:uid(),q:q,options:opts.map(function(t){return {id:uid(),t:t};}),voters:{},time:new Date().toLocaleString('id-ID'),ts:Date.now()});
+document.getElementById('pollQInput').value=''; pollDraft=['',''];
+renderPollDraft(); save(); renderPolls();
+showStatus('statusMsgPoll','Polling dibuat.','ok');
+});
+renderPollDraft(); renderExtra();
 // wiring
 document.getElementById('searchBox').addEventListener('input', renderStudents);
 document.getElementById('btnShufflePositions').addEventListener('click', shufflePositions);
@@ -2329,18 +2784,6 @@ refreshFromShared(false);
 setInterval(function(){ if(!unlocked) refreshFromShared(false); }, 4000);
 setInterval(updateDashboard, 30000);
 })();
-</script>
-<!-- Register Service Worker for PWA -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js')
-    .then(function(registration) {
-      console.log('✓ Service Worker berhasil didaftarkan:', registration.scope);
-    })
-    .catch(function(error) {
-      console.log('✗ Gagal mendaftarkan Service Worker:', error);
-    });
-}
 </script>
 </body>
 </html>
