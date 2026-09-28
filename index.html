@@ -90,7 +90,7 @@
 --ok:#3E7A55; --warn:#A8432C;
 --accent-rgb:74,79,160;
 }
-/* ===== mode gelap — tiap palet punya latar gelap sendiri, bukan cuma hitam/abu ===== */
+/* mode gelap, tiap palet punya latar gelap sendiri */
 html[data-mode="dark"]{
 --bg:#1B140A; --bg2:#241B0E; --surface:#2A2011; --surface2:#332614; --surface3:#3D2D18;
 --line:rgba(255,220,150,.10); --line-strong:rgba(255,220,150,.18);
@@ -803,6 +803,27 @@ opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;
 #pollQInput{width:100%;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.85rem .9rem;font-size:16px;margin-bottom:.7rem;background:var(--bg2);color:var(--cream);}
 #voterNameInput{width:100%;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.7rem .8rem;font-size:16px;background:var(--bg2);color:var(--cream);}
 #spinListText{width:100%;min-height:120px;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:.65rem .8rem;font-size:16px;background:var(--bg2);color:var(--cream);margin-bottom:.6rem;}
+
+/* gerbang masuk (siswa / guru / tamu) */
+#entryGate{z-index:300;background:rgba(8,6,4,.74);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+#entryGate .modal{margin:auto;max-width:360px;}
+html.gate-open, html.gate-open body{overflow:hidden;}
+.gate-brand{display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem;}
+.gate-logo{width:46px;height:46px;object-fit:contain;flex:none;}
+.gate-kicker{font-size:.68rem;color:var(--muted);font-weight:600;letter-spacing:.02em;}
+.gate-brand h3{margin:.1rem 0 0;font-size:1.25rem;}
+.gate-lead{margin:0 0 .8rem;font-size:.84rem;color:var(--muted);line-height:1.45;}
+.gate-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem;padding:.25rem;background:var(--surface3);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:.85rem;}
+.gate-seg button{border:none;background:transparent;color:var(--muted);font:700 .8rem 'Plus Jakarta Sans',sans-serif;padding:.6rem .3rem;min-height:40px;border-radius:10px;cursor:pointer;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease;}
+.gate-seg button[aria-checked="true"]{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#1B1608;box-shadow:0 6px 14px -6px rgba(var(--accent-rgb),.5);}
+#gateNameWrap label{display:block;font-size:.74rem;font-weight:700;color:var(--cream);margin-bottom:.35rem;}
+#entryGate #gateName{font-size:16px;}
+.gate-hint{margin:.55rem 0 .9rem;font-size:.74rem;color:var(--muted);line-height:1.45;}
+#confirmBox{z-index:320;}
+#confirmBox .modal{margin:auto;max-width:340px;}
+#confirmBox p{margin:0 0 1rem;font-size:.9rem;line-height:1.5;color:var(--muted);}
+#confirmBox p b{color:var(--cream);}
+.who-chip{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--muted);margin-top:.35rem;}
 </style>
 </head>
 <body>
@@ -814,6 +835,43 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 }catch(e){}</script>
 <div id="schemeWash"></div>
 <div id="schemeToast"></div>
+<div class="modal-bg" id="confirmBox" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+<div class="modal">
+<h3 id="confirmTitle">Yakin?</h3>
+<p id="confirmText"></p>
+<div class="modal-btns">
+<button type="button" class="ghost rippleable" id="confirmNo">Kembali</button>
+<button type="button" class="primary rippleable" id="confirmYes">Ya, yakin</button>
+</div>
+</div>
+</div>
+
+<div class="modal-bg" id="entryGate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+<div class="modal">
+<div class="gate-brand">
+<img class="gate-logo" src="https://man1surakarta.sch.id/aduca/images/LOGOMAN1SOLO.png" alt="">
+<div><div class="gate-kicker">MAN 1 Surakarta · 2026–2029</div><h3 id="gateTitle">Euphoria X E-11</h3></div>
+</div>
+<p class="gate-lead">Masuk dulu sebelum melihat halaman.</p>
+<div class="gate-seg" role="radiogroup" aria-label="Masuk sebagai">
+<button type="button" role="radio" aria-checked="true" data-role="siswa">Siswa</button>
+<button type="button" role="radio" aria-checked="false" data-role="guru">Guru</button>
+<button type="button" role="radio" aria-checked="false" data-role="tamu">Tamu</button>
+</div>
+<div id="gateNameWrap">
+<label for="gateName" id="gateLabel">Pilih namamu</label>
+<select id="gateSelect" aria-label="Pilih nama sesuai nomor absen"></select>
+<input type="text" id="gateName" maxlength="40" autocomplete="off" placeholder="Contoh: Bu Rina" style="display:none">
+</div>
+<p class="status-msg" id="gateMsg"></p>
+<p class="gate-hint" id="gateHint"></p>
+<div class="modal-btns">
+<button type="button" class="ghost rippleable" id="gateCancel" style="display:none">Batal</button>
+<button type="button" class="primary rippleable" id="gateGo">Masuk</button>
+</div>
+</div>
+</div>
+
 <div id="alarmBanner" class="alarm-banner" role="status" aria-live="polite"></div>
 <audio id="alarmAudio" preload="none" src="https://raw.githubusercontent.com/aslan27220/Euphoria-audio/main/ssstik.io_1789954562606.mp3"></audio>
 <div class="topbar">
@@ -1213,6 +1271,8 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 <div class="sheet-item rippleable" data-tab="info"><span class="tile-icon" style="--tc1:#D98C63;--tc2:#BE6C46;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.6" r="0.9" fill="currentColor" stroke="none"/></svg></span><span class="tile-label">Info Kelas</span></div>
 <div class="sheet-item rippleable" data-tab="riwayat"><span class="tile-icon" style="--tc1:#8A7CB0;--tc2:#5A4E7E;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 11a9 9 0 1 1 2.6 6.4"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 2"/></svg></span><span class="tile-label">Riwayat</span></div>
 <div class="sheet-item rippleable" data-tab="galeri"><span class="tile-icon" style="--tc1:#E0729A;--tc2:#B23C6B;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 8h3l1.5-2h7L17 8h3a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 8Z"/><circle cx="12" cy="14" r="3.6"/></svg></span><span class="tile-label">Galeri Instagram</span></div>
+<div class="sheet-item rippleable" id="btnChangeName" role="button" tabindex="0"><span class="tile-icon" style="--tc1:#8A7CB0;--tc2:#5A4E7E;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6 1.3 0 2.5.4 3.4 1.1"/><path d="M14.5 20.5l.6-2.6 5-5a1.4 1.4 0 0 1 2 2l-5 5z"/></svg></span><span class="tile-label">Ganti nama<small id="sheetWho" style="display:block;font-size:.7rem;font-weight:500;color:var(--muted);margin-top:.1rem;"></small></span></div>
+<div class="sheet-item rippleable" id="btnLogout" role="button" tabindex="0"><span class="tile-icon" style="--tc1:#D98C63;--tc2:#BE6C46;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20H9"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/></svg></span><span class="tile-label">Keluar</span></div>
 </div>
 </div>
 
@@ -1388,8 +1448,7 @@ function studentByLabel(label){
 return state.students.filter(function(s){ return label === (s.no+'. '+s.name); })[0];
 }
 function sanitizeAssignments(){
-// jaga-jaga: pastikan nama yang duduk di sebuah meja selalu sesuai zona (L/P) meja itu.
-// mencegah bug "zona tidak berubah tapi nama jadi salah gender" akibat data lama/pertukaran posisi.
+// Nama di tiap meja harus cocok dengan zona L/P mejanya; data lama bisa tidak cocok.
 var changed = false;
 Object.keys(state.assignments).forEach(function(d){
 var zone = state.zones[d] || '';
@@ -2027,7 +2086,7 @@ requestAnimationFrame(step);
 }
 function updateDashboard(){
 var greetEl=document.getElementById('dashGreet');
-if(greetEl) greetEl.textContent = greetingWord()+', X E-11';
+if(greetEl) greetEl.textContent = greetingWord()+', '+greetName();
 var dateEl=document.getElementById('dashDate');
 if(dateEl) dateEl.textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
 var total = state.students.length;
@@ -2318,8 +2377,7 @@ if(newName){
 var newPos = posMap[newName];
 if(newPos && !(newPos.desk==desk && newPos.slot===i)){
 if(!state.assignments[newPos.desk]) state.assignments[newPos.desk] = ['',''];
-// hanya pindahkan siswa lama ke meja tukarannya kalau zona meja itu memang sesuai gendernya —
-// mencegah nama laki-laki nyasar ke meja berzona perempuan (atau sebaliknya).
+// Siswa lama hanya ditukar ke meja yang zonanya cocok dengan gendernya.
 var oldStu = oldNameAtSlot ? studentByLabel(oldNameAtSlot) : null;
 var targetZone = state.zones[newPos.desk] || '';
 if(oldNameAtSlot && oldStu && oldStu.g === targetZone){
@@ -2422,7 +2480,7 @@ b.addEventListener('click', function(e){ applyScheme(b.getAttribute('data-scheme
 syncPickerUI();
 })();
 
-// ===== spin (roda) & polling =====
+// spin (roda) & polling
 var spinning=false, spinRot=0, spinSig='', seenTs=0;
 var LS_TAB='xe11-spin-tab', LS_PERS='xe11-spin-personal';
 var spinTab = (function(){ try{ return localStorage.getItem(LS_TAB)==='admin' ? 'admin' : 'pribadi'; }catch(e){ return 'pribadi'; } })();
@@ -2466,7 +2524,7 @@ adminDirty=false;
 save();
 if(showMsg) showStatus('statusMsgSpin','Roda dibagikan ke semua perangkat ('+state.spinItems.length+' pilihan).','ok');
 }
-// ---- gambar roda ----
+// gambar roda
 function lum(hex){
 var m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return .5;
 var n=parseInt(m[1],16), r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
@@ -2523,7 +2581,7 @@ ctx.restore();
 }
 }
 }
-// ---- putar ----
+// putar
 function setResult(label,name,pop){
 var res=document.getElementById('spinResult');
 res.classList.remove('pop');
@@ -2562,7 +2620,7 @@ var items=activeItems();
 if(items.length<2) return;
 runSpin(items, Math.floor(Math.random()*items.length), spinTab==='admin');
 }
-// ---- UI ----
+// UI roda
 function fmtTime(ts){ try{ return new Date(ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
 function syncSpinUI(){
 var isAdmin=spinTab==='admin', canEdit=!isAdmin || unlocked, cfg=editCfg();
@@ -2672,8 +2730,137 @@ if(ww) new ResizeObserver(function(){ if(!spinning) drawWheel(activeItems()); })
 new MutationObserver(function(){ if(!spinning) drawWheel(activeItems()); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-scheme','data-mode']});
 // polling
 var pollDraft=['',''];
-function voterName(){ try{return localStorage.getItem('xe11-voter')||'';}catch(e){return '';} }
-function setVoterName(n){ try{localStorage.setItem('xe11-voter',n);}catch(e){} }
+var memName='', memRole='';
+function voterName(){ try{ var v=localStorage.getItem('xe11-voter'); return v!==null? v : (memName||''); }catch(e){ return memName||''; } }
+function setVoterName(n){ memName=n; try{ if(n) localStorage.setItem('xe11-voter',n); else localStorage.removeItem('xe11-voter'); }catch(e){} }
+function voterRole(){ try{ var v=localStorage.getItem('xe11-role'); return v!==null? v : (memRole||''); }catch(e){ return memRole||''; } }
+function setVoterRole(r){ memRole=r; try{ localStorage.setItem('xe11-role',r); }catch(e){} }
+var memNo='';
+function voterNo(){ try{ var v=localStorage.getItem('xe11-voter-no'); return v!==null? v : (memNo||''); }catch(e){ return memNo||''; } }
+function setVoterNo(n){ memNo=String(n||''); try{ if(n) localStorage.setItem('xe11-voter-no',String(n)); else localStorage.removeItem('xe11-voter-no'); }catch(e){} }
+function canVote(){ return voterRole()==='siswa' && !!voterName(); }
+function greetName(){
+var r=voterRole(), n=voterName();
+if(r==='siswa' && n) return n.split(' ')[0];
+if(r==='guru') return 'Guru';
+if(r==='tamu') return 'Tamu';
+return 'X E-11';
+}
+function whoLabel(){
+var r=voterRole(), n=voterName();
+if(r==='siswa') return (voterNo()? voterNo()+'. ' : '')+n;
+if(r==='guru') return n? 'Guru · '+n : 'Guru';
+return 'Tamu';
+}
+function renderWho(){
+var el=document.getElementById('sheetWho'); if(!el) return;
+el.textContent = voterRole() ? 'Masuk sebagai '+whoLabel() : '';
+}
+// konfirmasi
+var confirmEl=document.getElementById('confirmBox'), confirmCb=null;
+function askConfirm(title, html, yesLabel, cb){
+document.getElementById('confirmTitle').textContent=title;
+document.getElementById('confirmText').innerHTML=html;
+document.getElementById('confirmYes').textContent=yesLabel||'Ya, yakin';
+confirmCb=cb; confirmEl.classList.add('show');
+setTimeout(function(){ document.getElementById('confirmNo').focus(); }, 40);
+}
+function closeConfirm(){ confirmEl.classList.remove('show'); confirmCb=null; }
+document.getElementById('confirmNo').addEventListener('click', closeConfirm);
+document.getElementById('confirmYes').addEventListener('click', function(){ var cb=confirmCb; closeConfirm(); if(cb) cb(); });
+confirmEl.addEventListener('keydown', function(e){ if(e.key==='Escape') closeConfirm(); });
+function openChangeName(){ closeSheet(); if(voterRole()) askChange(); else openGate(); }
+document.getElementById('btnChangeName').addEventListener('click', openChangeName);
+document.getElementById('btnChangeName').addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openChangeName(); } });
+function doLogout(){
+memRole=''; memName=''; memNo='';
+try{ localStorage.removeItem('xe11-role'); localStorage.removeItem('xe11-voter'); localStorage.removeItem('xe11-voter-no'); }catch(e){}
+if(unlocked) document.getElementById('lockBtn').click();
+renderWho(); updateDashboard(); renderPolls(); switchTab('home');
+openGate();
+}
+function askLogout(){
+closeSheet();
+var who = voterRole() ? ' dari <b>'+esc(whoLabel())+'</b>' : '';
+askConfirm('Keluar?', 'Kamu akan keluar'+who+'. Login di perangkat ini dihapus dan kamu harus masuk lagi. Yakin?', 'Ya, keluar', doLogout);
+}
+document.getElementById('btnLogout').addEventListener('click', askLogout);
+document.getElementById('btnLogout').addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); askLogout(); } });
+function askChange(){
+askConfirm('Ganti nama?', 'Sekarang kamu masuk sebagai <b>'+esc(whoLabel())+'</b>. Yakin mau ganti?', 'Ya, ganti', openGate);
+}
+// gerbang masuk
+var gateEl=document.getElementById('entryGate'), gateRole='siswa';
+var gateSel=document.getElementById('gateSelect'), gateInp=document.getElementById('gateName'), gateMsg=document.getElementById('gateMsg');
+function fillStudentSelect(selNo){
+var list=(state.students||[]).slice().sort(function(x,y){ return x.no-y.no; });
+gateSel.innerHTML='';
+var ph=document.createElement('option'); ph.value=''; ph.textContent='— Pilih no. absen & nama —'; gateSel.appendChild(ph);
+list.forEach(function(st){ var o=document.createElement('option'); o.value=String(st.no); o.textContent=st.no+'. '+st.name; gateSel.appendChild(o); });
+gateSel.value = selNo ? String(selNo) : '';
+if(gateSel.value!==String(selNo||'')) gateSel.value='';
+}
+function applyGateRole(r){
+gateRole=r;
+Array.prototype.forEach.call(gateEl.querySelectorAll('.gate-seg button'), function(b){ b.setAttribute('aria-checked', b.getAttribute('data-role')===r ? 'true':'false'); });
+var wrap=document.getElementById('gateNameWrap'), lbl=document.getElementById('gateLabel'), hint=document.getElementById('gateHint'), go=document.getElementById('gateGo');
+gateMsg.textContent='';
+if(r==='siswa'){
+wrap.style.display=''; gateSel.style.display=''; gateInp.style.display='none';
+lbl.textContent='Pilih namamu (sesuai no. absen)';
+hint.textContent='Pilihan tersimpan di perangkat ini. Di polling kamu tidak perlu isi nama lagi.';
+go.textContent='Masuk';
+} else if(r==='guru'){
+wrap.style.display=''; gateSel.style.display='none'; gateInp.style.display='';
+lbl.textContent='Nama (opsional)';
+hint.textContent='Mode guru hanya untuk melihat. Tidak bisa ikut polling.';
+go.textContent='Masuk sebagai Guru';
+} else {
+wrap.style.display='none';
+hint.textContent='Mode tamu hanya untuk melihat. Tidak bisa ikut polling.';
+go.textContent='Masuk sebagai Tamu';
+}
+}
+function openGate(){
+var cur=voterRole();
+fillStudentSelect(cur==='siswa' ? voterNo() : '');
+gateInp.value = cur==='guru' ? voterName() : '';
+applyGateRole(cur||'siswa');
+document.getElementById('gateCancel').style.display = cur ? '' : 'none';
+gateEl.classList.add('show');
+document.documentElement.classList.add('gate-open');
+setTimeout(function(){ if(gateRole==='siswa') gateSel.focus(); else if(gateRole==='guru') gateInp.focus(); }, 60);
+}
+function closeGate(){
+gateEl.classList.remove('show');
+document.documentElement.classList.remove('gate-open');
+}
+function commitLogin(role, name, no){
+setVoterRole(role); setVoterName(name); setVoterNo(no);
+closeGate();
+renderWho(); updateDashboard(); renderPolls();
+}
+function gateEnter(){
+if(gateRole==='siswa'){
+var no=gateSel.value;
+var st=(state.students||[]).filter(function(x){ return String(x.no)===no; })[0];
+if(!st){ gateMsg.className='status-msg error'; gateMsg.textContent='Pilih namamu dulu.'; gateSel.focus(); return; }
+askConfirm('Yakin ini kamu?', 'Masuk sebagai <b>'+st.no+'. '+esc(st.name)+'</b>?', 'Ya, masuk', function(){ commitLogin('siswa', st.name, st.no); });
+} else if(gateRole==='guru'){
+var gn=gateInp.value.trim().replace(/\s+/g,' ');
+askConfirm('Masuk sebagai Guru?', 'Masuk sebagai <b>Guru'+(gn? ' · '+esc(gn) : '')+'</b>? Mode ini hanya untuk melihat.', 'Ya, masuk', function(){ commitLogin('guru', gn, ''); });
+} else {
+askConfirm('Masuk sebagai Tamu?', 'Mode tamu hanya untuk melihat. Tidak bisa ikut polling.', 'Ya, masuk', function(){ commitLogin('tamu', '', ''); });
+}
+}
+Array.prototype.forEach.call(gateEl.querySelectorAll('.gate-seg button'), function(b){
+b.addEventListener('click', function(){ applyGateRole(b.getAttribute('data-role')); if(gateRole==='siswa') gateSel.focus(); else if(gateRole==='guru') gateInp.focus(); });
+});
+document.getElementById('gateGo').addEventListener('click', gateEnter);
+document.getElementById('gateCancel').addEventListener('click', closeGate);
+gateSel.addEventListener('change', function(){ gateMsg.textContent=''; });
+gateInp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); gateEnter(); } });
+gateEl.addEventListener('keydown', function(e){ if(e.key==='Escape' && voterRole() && !confirmEl.classList.contains('show')) closeGate(); });
 function pollCounts(p){
 var c={}, total=0; p.options.forEach(function(o){c[o.id]=0;});
 Object.keys(p.voters||{}).forEach(function(k){ var o=p.voters[k].o; if(c[o]!==undefined){c[o]++; total++;} });
@@ -2683,7 +2870,7 @@ function renderPolls(){
 var box=document.getElementById('pollList');
 if(!box) return;
 if(box.contains(document.activeElement) && document.activeElement.tagName==='INPUT') return;
-var name=voterName();
+var name=canVote()? voterName() : '';
 if(!state.polls.length){ box.innerHTML='<p class="empty-note">Belum ada polling.</p>'; return; }
 box.innerHTML='';
 state.polls.slice().sort(function(a,b){return b.ts-a.ts;}).forEach(function(p){
@@ -2694,26 +2881,19 @@ var pc=pollCounts(p);
 var head='<div style="display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start;"><div><p class="poll-q">'+esc(p.q)+'</p><p class="poll-meta">'+pc.total+' suara · '+esc(p.time)+'</p></div>'+(unlocked?'<button class="pdel" aria-label="Hapus polling" style="flex:none;border:1px solid var(--line-strong);background:var(--surface2);color:var(--warn);border-radius:8px;min-width:38px;min-height:38px;cursor:pointer;font-weight:800;">✕</button>':'')+'</div>';
 card.innerHTML=head;
 if(unlocked) card.querySelector('.pdel').addEventListener('click',function(){ state.polls=state.polls.filter(function(x){return x.id!==p.id;}); save(); renderPolls(); });
-if(!name){
-var g=document.createElement('div'); g.className='name-gate';
-g.innerHTML='<p>Isi namamu dulu sebelum memilih</p><input type="text" class="gate-in" placeholder="Nama lengkap / panggilan" maxlength="40"><button class="primary rippleable" style="padding:.7rem;">Lanjut</button>';
-var go=function(){ var v=g.querySelector('input').value.trim(); if(!v){ g.querySelector('input').focus(); return; } setVoterName(v); renderPolls(); };
-g.querySelector('button').addEventListener('click',go);
-g.querySelector('input').addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
-card.appendChild(g);
-} else {
 var w=document.createElement('div'); w.className='who-row';
-w.innerHTML='<span>Memilih sebagai <b style="color:var(--cream)">'+esc(name)+'</b></span><button class="manage-link" style="font-size:.72rem;">Ganti nama</button>';
-w.querySelector('button').addEventListener('click',function(){ try{localStorage.removeItem('xe11-voter');}catch(e){} renderPolls(); });
+var wl = canVote() ? 'Memilih sebagai <b style="color:var(--cream)">'+(voterNo()? voterNo()+'. ' : '')+esc(voterName())+'</b>' : 'Mode '+(voterRole()==='guru'?'Guru':'Tamu')+' · hanya melihat hasil';
+w.innerHTML='<span>'+wl+'</span><button type="button" class="manage-link" style="font-size:.72rem;">Ganti nama</button>';
+w.querySelector('button').addEventListener('click', askChange);
 card.appendChild(w);
-}
 p.options.forEach(function(o){
 var pct=pc.total? Math.round(pc.c[o.id]/pc.total*100):0;
 var b=document.createElement('button');
 b.className='poll-opt'+(mine===o.id?' mine':'')+(name?'':' locked');
+if(!name) b.setAttribute('aria-disabled','true');
 b.innerHTML='<span class="bar" style="width:'+pct+'%"></span><span class="t">'+esc(o.t)+(mine===o.id?' ✓':'')+'</span><span class="n">'+pc.c[o.id]+' · '+pct+'%</span>';
 b.addEventListener('click',function(){
-if(!voterName()){ var gi=card.querySelector('.gate-in'); if(gi) gi.focus(); return; }
+if(!canVote()) return;
 p.voters=p.voters||{};
 p.voters[voterName().toLowerCase()]={n:voterName(),o:o.id};
 save(); renderPolls();
@@ -2747,7 +2927,6 @@ renderPollDraft(); save(); renderPolls();
 showStatus('statusMsgPoll','Polling dibuat.','ok');
 });
 renderPollDraft(); renderExtra();
-// wiring
 document.getElementById('searchBox').addEventListener('input', renderStudents);
 document.getElementById('btnShufflePositions').addEventListener('click', shufflePositions);
 document.getElementById('btnRandomAll').addEventListener('click', function(){ randomizeZones(); rollSeats(); });
@@ -2780,6 +2959,7 @@ if(v){ currentSubject = v; syncGroupControlsUI(); renderGroups(); }
 renderStudents(); renderDesks(); renderGroups(); renderHistory(); syncGroupControlsUI();
 renderInfo(); renderCountdowns(); renderTasks();
 renderDayPills(); renderJadwalList(); updateDashboard();
+renderWho(); if(!voterRole()) openGate();
 refreshFromShared(false);
 setInterval(function(){ if(!unlocked) refreshFromShared(false); }, 4000);
 setInterval(updateDashboard, 30000);
