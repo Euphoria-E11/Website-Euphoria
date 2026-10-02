@@ -2120,13 +2120,23 @@ else { tb.style.display='none'; tb.classList.remove('pulse'); }
 var ALARM_KEY = 'xe11-alarm-enabled';
 var alarmEnabled = (function(){ try{ return localStorage.getItem(ALARM_KEY) !== '0'; }catch(e){ return true; } })();
 var alarmFired = {};
-function playChime(){
+var audioCtx = null;
+function initAudioContext(){
+if(audioCtx) return audioCtx;
 try{
 var Ctx = window.AudioContext || window.webkitAudioContext;
-if(!Ctx) return;
-var ctx = new Ctx();
-[880, 1108, 1318].forEach(function(freq, i){
-var t0 = ctx.currentTime + i*0.18;
+if(Ctx) audioCtx = new Ctx();
+}catch(e){}
+return audioCtx;
+}
+function playChime(){
+try{
+var ctx = initAudioContext();
+if(!ctx) return;
+var freqs = [880, 1108, 1318];
+var baseTime = ctx.currentTime;
+freqs.forEach(function(freq, i){
+var t0 = baseTime + i*0.18;
 var osc = ctx.createOscillator();
 var gain = ctx.createGain();
 osc.type = 'sine';
@@ -2134,21 +2144,33 @@ osc.frequency.value = freq;
 gain.gain.setValueAtTime(0.0001, t0);
 gain.gain.exponentialRampToValueAtTime(0.22, t0+0.02);
 gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.55);
-osc.connect(gain); gain.connect(ctx.destination);
-osc.start(t0); osc.stop(t0+0.6);
+osc.connect(gain);
+gain.connect(ctx.destination);
+osc.start(t0);
+osc.stop(t0+0.6);
 });
 }catch(e){}
 }
 function playAlarmSound(){
 var audioEl = document.getElementById('alarmAudio');
-if(!audioEl){ playChime(); return; }
+if(audioEl){
 try{
 audioEl.currentTime = 0;
 var p = audioEl.play();
-if(p && p.catch) p.catch(function(){ playChime(); });
+if(p && typeof p.then === 'function'){
+p.catch(function(){ playChime(); });
+} else {
 clearTimeout(audioEl._stopTimer);
 audioEl._stopTimer = setTimeout(function(){ audioEl.pause(); audioEl.currentTime = 0; }, 6000);
-}catch(e){ playChime(); }
+}
+}catch(e){
+playChime();
+}
+} else {
+playChime();
+}
+playChime();
+if(navigator.vibrate) navigator.vibrate([200,100,200,100,200]);
 }
 function showAlarmBanner(msg){
 var el = document.getElementById('alarmBanner');
@@ -2169,10 +2191,9 @@ jadwalData[todayName].forEach(function(p){
 if(p.brk) return;
 var endMin = parseTimeToMin(p.t.split('-')[1]);
 var key = todayKey+'|'+p.t;
-if(nowMin===endMin && !alarmFired[key]){
+if(Math.abs(nowMin-endMin)<=1 && !alarmFired[key]){
 alarmFired[key] = true;
 playAlarmSound();
-if(navigator.vibrate) navigator.vibrate([200,100,200]);
 showAlarmBanner(p.s+' telah selesai.');
 if('Notification' in window && Notification.permission==='granted'){
 try{ new Notification('Jam pelajaran selesai', {body:p.s+' baru saja berakhir.'}); }catch(e){}
@@ -2189,10 +2210,12 @@ try{ localStorage.setItem(ALARM_KEY, alarmEnabled ? '1':'0'); }catch(e){}
 if(alarmEnabled && 'Notification' in window && Notification.permission==='default'){
 try{ Notification.requestPermission(); }catch(e){}
 }
+initAudioContext();
 });
 }
 setInterval(checkScheduleAlarm, 15000);
 checkScheduleAlarm();
+initAudioContext();
 // backend sync
 function save(){
 if(!BACKEND_URL) return;
