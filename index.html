@@ -824,6 +824,7 @@ html.gate-open, html.gate-open body{overflow:hidden;}
 #confirmBox p{margin:0 0 1rem;font-size:.9rem;line-height:1.5;color:var(--muted);}
 #confirmBox p b{color:var(--cream);}
 .who-chip{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.74rem;color:var(--muted);margin-top:.35rem;}
+.desk.swap-sel{outline:3px solid var(--gold);outline-offset:-3px;}
 </style>
 </head>
 <body>
@@ -1016,6 +1017,7 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 <div class="btn-row" id="editActions" style="display:none;">
 <button class="primary rippleable" id="btnShufflePositions" style="flex:1;">Acak Posisi Meja (pasangan tetap)</button>
 </div>
+<div class="btn-row" id="editLockRow" style="display:none;"><button class="ghost rippleable" id="btnPairLock" style="flex:1;"></button></div>
 <div class="btn-row" id="editActions2" style="display:none;">
 <button class="ghost small rippleable" id="btnRandomAll">Acak posisi + siswa</button>
 <button class="ghost small rippleable" id="btnRandomZone">Acak zona saja</button>
@@ -1394,7 +1396,8 @@ tasks: [],
 spinItems: [],
 spinCfg: null,
 spinLast: null,
-polls: []
+polls: [],
+pairLock: false
 };
 var history = [];
 var currentSubject = "Matematika";
@@ -1486,7 +1489,7 @@ var label = zone==='L' ? 'Laki-laki' : (zone==='P' ? 'Perempuan' : 'Belum diatur
 body = '<div class="zone-label">'+label+'</div>';
 }
 div.innerHTML = '<div class="num">Meja '+num+'</div>'+body;
-if(unlocked && (zone==='L'||zone==='P')){
+if(unlocked && !state.pairLock && (zone==='L'||zone==='P')){
 var editBtn = document.createElement('button');
 editBtn.className = 'edit-seat-btn';
 editBtn.setAttribute('aria-label', 'Atur meja '+num);
@@ -1494,7 +1497,8 @@ editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 editBtn.addEventListener('click', function(e){ e.stopPropagation(); openSeatModal(num); });
 div.appendChild(editBtn);
 }
-div.addEventListener('click', function(){ cycleZone(num); });
+if(swapFrom===num) div.classList.add('swap-sel');
+div.addEventListener('click', function(){ if(state.pairLock) pairSwapClick(num); else cycleZone(num); });
 grid.appendChild(div);
 });
 var absent = state.students.filter(function(s){return !s.hadir;});
@@ -1513,6 +1517,38 @@ var seated = {};
 Object.keys(state.assignments).forEach(function(d){ (state.assignments[d]||[]).forEach(function(n){ if(n) seated[n] = 1; }); });
 return state.students.filter(function(s){ return s.hadir && !seated[s.no+'. '+s.name]; });
 }
+var swapFrom = null;
+function deskLabel(n){
+var a = (state.assignments[n]||[]).filter(function(x){return x;}).map(function(x){ return x.replace(/^\d+\.\s*/,''); });
+return 'Meja '+n+(a.length ? ' ('+a.join(' & ')+')' : ' (kosong)');
+}
+function pairSwapClick(num){
+if(!unlocked) return;
+if(swapFrom===null){
+swapFrom = num; renderDesks();
+showStatus('statusMsgDenah','Meja si A: '+deskLabel(num)+'. Sekarang pilih meja si B (tap meja yang sama untuk batal).','');
+return;
+}
+if(swapFrom===num){ swapFrom = null; renderDesks(); showStatus('statusMsgDenah','Dibatalkan.',''); return; }
+var a = swapFrom, b = num, la = deskLabel(a), lb = deskLabel(b);
+var za = state.zones[a]||'', zb = state.zones[b]||'', aa = state.assignments[a], ab = state.assignments[b];
+state.zones[a] = zb; state.zones[b] = za;
+if(ab) state.assignments[a] = ab; else delete state.assignments[a];
+if(aa) state.assignments[b] = aa; else delete state.assignments[b];
+swapFrom = null;
+pushHistory(); save(); renderDesks();
+showStatus('statusMsgDenah','Meja si A: '+la+' ⇄ meja si B: '+lb+' sudah ditukar. Pasangan tetap utuh. Tekan Upload kalau sudah final.','ok');
+}
+function updatePairLockBtn(){
+var b = document.getElementById('btnPairLock'); if(!b) return;
+b.textContent = state.pairLock ? '🔒 Pasangan meja TERKUNCI (tap untuk buka)' : '🔓 Kunci pasangan meja';
+}
+function togglePairLock(){
+if(!unlocked) return;
+state.pairLock = !state.pairLock; swapFrom = null;
+save(); updatePairLockBtn(); renderDesks();
+showStatus('statusMsgDenah', state.pairLock ? 'Pasangan dikunci. Tap meja si A, lalu meja si B untuk menukar posisi. Pasangan tidak akan berubah.' : 'Kunci dibuka.','ok');
+}
 function cycleZone(num){
 if(!unlocked) return;
 var cur = state.zones[num] || '';
@@ -1524,6 +1560,7 @@ showStatus('statusMsgDenah', 'Zona Meja '+num+' diubah.'+(removed.length ? ' Dil
 }
 function randomizeZones(){
 if(!unlocked) return;
+if(state.pairLock){ showStatus('statusMsgDenah','Pasangan sedang terkunci. Buka kunci dulu kalau mau mengacak ulang.','error'); return; }
 var boys = presentByGender('L'), girls = presentByGender('P');
 var neededL = Math.ceil(boys.length/2), neededP = Math.ceil(girls.length/2);
 if(neededL+neededP > deskOrder.length){
@@ -1540,6 +1577,7 @@ showStatus('statusMsgDenah', 'Posisi zona diacak.', '');
 }
 function rollSeats(){
 if(!unlocked) return;
+if(state.pairLock){ showStatus('statusMsgDenah','Pasangan sedang terkunci. Buka kunci dulu kalau mau mengacak ulang.','error'); return; }
 var boys = shuffle(presentByGender('L'));
 var girls = shuffle(presentByGender('P'));
 var lDesks = deskOrder.filter(function(d){return state.zones[d]==='L';});
@@ -1557,6 +1595,7 @@ showStatus('statusMsgDenah', 'Tempat duduk berhasil diacak!', 'ok');
 }
 function resetZones(){
 if(!unlocked) return;
+if(state.pairLock){ showStatus('statusMsgDenah','Pasangan sedang terkunci. Buka kunci dulu kalau mau mengacak ulang.','error'); return; }
 state.zones = JSON.parse(JSON.stringify(defaultZones));
 state.assignments = {};
 save(); renderDesks();
@@ -2253,7 +2292,7 @@ else { el.textContent=''; }
 function postKey(key, obj){
 return fetch(BACKEND_URL+'?key='+encodeURIComponent(key), {
 method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(obj)
-}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.text(); });
+}).then(function(r){ return r.text().catch(function(){ return ''; }); });
 }
 function seatingPayload(){ return {zones:state.zones, assignments:state.assignments, students:state.students, ts:Date.now()}; }
 function hasPendingSave(){ return saveQ.busy || saveQ.dirty || saveQ.histDirty || saveQ.failed; }
@@ -2304,10 +2343,11 @@ showStatus('statusMsgDenah','Mengunggah hasil terbaru...','');
 flushSaves().then(function(ok){
 if(!ok) throw new Error('post');
 // cek ulang ke server: pastikan yang tersimpan sama dengan yang di layar admin
-return fetch(BACKEND_URL+'?key='+encodeURIComponent(SEAT_KEY)+'&_='+Date.now()).then(function(r){return r.text();}).then(function(t){
+function chk(key){ return fetch(BACKEND_URL+'?key='+encodeURIComponent(key)+'&_='+Date.now()).then(function(r){return r.text();}).then(function(t){
 var sv = JSON.parse(t);
-if(JSON.stringify(sv.assignments)!==JSON.stringify(state.assignments) || JSON.stringify(sv.zones)!==JSON.stringify(state.zones)) throw new Error('mismatch');
-});
+return JSON.stringify(sv.assignments)===JSON.stringify(state.assignments) && JSON.stringify(sv.zones)===JSON.stringify(state.zones);
+}).catch(function(){ return false; }); }
+return chk(SEAT_KEY).then(function(ok){ return ok || chk(SHARED_KEY); }).then(function(ok){ if(!ok) throw new Error('mismatch'); });
 }).then(function(){
 showStatus('statusMsgDenah','Berhasil! Semua siswa akan melihat susunan terbaru dalam beberapa detik.','ok');
 }).catch(function(){
@@ -2334,6 +2374,7 @@ if(s){
 state.students = s.students || state.students;
 state.zones = s.zones || state.zones;
 state.assignments = s.assignments || {};
+if(typeof s.pairLock==='boolean') state.pairLock = s.pairLock;
 state.groupsBySubject = s.groupsBySubject || state.groupsBySubject;
 state.infoItems = s.infoItems || state.infoItems;
 state.countdowns = s.countdowns || state.countdowns;
@@ -2420,6 +2461,8 @@ document.getElementById('manageCard').style.display = on?'':'none';
 document.getElementById('editActions').style.display = on?'':'none';
 document.getElementById('editActions2').style.display = on?'':'none';
 document.getElementById('editUploadRow').style.display = on?'flex':'none';
+document.getElementById('editLockRow').style.display = on?'':'none';
+updatePairLockBtn();
 document.getElementById('settingsCard').style.display = on?'':'none';
 document.getElementById('infoAddCard').style.display = on?'':'none';
 document.getElementById('cdAddCard').style.display = on?'':'none';
@@ -3052,10 +3095,11 @@ showStatus('statusMsgPoll','Polling dibuat.','ok');
 renderPollDraft(); renderExtra();
 document.getElementById('searchBox').addEventListener('input', renderStudents);
 document.getElementById('btnShufflePositions').addEventListener('click', shufflePositions);
-document.getElementById('btnRandomAll').addEventListener('click', function(){ randomizeZones(); rollSeats(); });
+document.getElementById('btnRandomAll').addEventListener('click', function(){ if(state.pairLock){ randomizeZones(); return; } randomizeZones(); rollSeats(); });
 document.getElementById('btnRandomZone').addEventListener('click', randomizeZones);
 document.getElementById('btnResetZone').addEventListener('click', resetZones);
 document.getElementById('btnUploadNow').addEventListener('click', uploadNow);
+document.getElementById('btnPairLock').addEventListener('click', togglePairLock);
 document.getElementById('btnRefreshDenah').addEventListener('click', function(){ refreshFromShared(true); });
 document.getElementById('btnRefreshKelompok').addEventListener('click', function(){ refreshFromShared(true); });
 document.getElementById('btnRollGroup').addEventListener('click', rollGroups);
