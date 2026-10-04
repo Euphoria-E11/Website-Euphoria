@@ -998,6 +998,10 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 
 <section class="tab-panel" id="tab-denah">
 <div class="sub-head"><button class="back-btn rippleable" data-goto="home" aria-label="Kembali ke menu">‹</button><h2>Denah Kelas</h2></div>
+<div class="btn-row" id="editUploadRow" style="display:none;flex-direction:column;align-items:stretch;gap:.35rem;">
+<button class="primary rippleable" id="btnUploadNow" style="width:100%;">⬆ Upload hasil terbaru ke semua siswa</button>
+<p class="status-msg" id="syncBadge" style="margin:0;text-align:center;"></p>
+</div>
 <div class="card">
 <div class="guru-desk">Meja guru</div>
 <div class="desk-grid" id="deskGrid"></div>
@@ -1007,6 +1011,7 @@ if(m==='dark')document.documentElement.setAttribute('data-mode','dark');
 <span><span class="dot" style="background:var(--bg2);border:1px solid var(--line-strong)"></span>Netral</span>
 </div>
 <div class="absent-note" id="absentNote"></div>
+<div class="absent-note" id="unseatedNote" style="display:none;"></div>
 </div>
 <div class="btn-row" id="editActions" style="display:none;">
 <button class="primary rippleable" id="btnShufflePositions" style="flex:1;">Acak Posisi Meja (pasangan tetap)</button>
@@ -1305,7 +1310,7 @@ Gelap
 <div class="modal-bg" id="seatModal">
 <div class="modal">
 <h3 id="seatModalTitle">Atur Meja</h3>
-<p style="font-size:.76rem;color:var(--muted);margin:.2rem 0 .5rem;">Pilih siapa yang duduk di kursi ini.</p>
+<p style="font-size:.76rem;color:var(--muted);margin:.2rem 0 .5rem;">Pilih siapa yang duduk di kursi ini. Yang tampil hanya siswa yang belum punya meja.</p>
 <p style="font-size:.74rem;font-weight:700;margin:.4rem 0 .2rem;color:var(--cream);">Kursi 1</p>
 <select id="seatSelectA"></select>
 <p style="font-size:.74rem;font-weight:700;margin:.4rem 0 .2rem;color:var(--cream);">Kursi 2</p>
@@ -1494,14 +1499,28 @@ grid.appendChild(div);
 });
 var absent = state.students.filter(function(s){return !s.hadir;});
 document.getElementById('absentNote').textContent = absent.length ? ('Tidak hadir hari ini: '+absent.map(function(s){return s.no+'. '+s.name;}).join(', ')) : '';
+var un = document.getElementById('unseatedNote');
+if(un){
+var list = unseatedList();
+if(unlocked && list.length){
+un.style.display = '';
+un.innerHTML = '<b>Belum dapat meja ('+list.length+'):</b> '+list.map(function(s){ return esc(s.no+'. '+s.name+' ('+s.g+')'); }).join(', ');
+} else { un.style.display = 'none'; un.innerHTML = ''; }
+}
+}
+function unseatedList(){
+var seated = {};
+Object.keys(state.assignments).forEach(function(d){ (state.assignments[d]||[]).forEach(function(n){ if(n) seated[n] = 1; }); });
+return state.students.filter(function(s){ return s.hadir && !seated[s.no+'. '+s.name]; });
 }
 function cycleZone(num){
 if(!unlocked) return;
 var cur = state.zones[num] || '';
 state.zones[num] = cur==='' ? 'L' : (cur==='L' ? 'P' : '');
+var removed = (state.assignments[num]||[]).filter(function(n){ return n; });
 delete state.assignments[num];
 save(); renderDesks();
-showStatus('statusMsgDenah', 'Zona Meja '+num+' diubah. Meja lain tidak ikut berubah — atur ulang siapa yang duduk di meja ini lewat ikon pensil.', '');
+showStatus('statusMsgDenah', 'Zona Meja '+num+' diubah.'+(removed.length ? ' Dilepas dari meja ini: '+removed.join(' & ')+'. Mereka masuk daftar "Belum dapat meja" di bawah denah; meja lain tidak berubah.' : ' Meja lain tidak berubah.'), '');
 }
 function randomizeZones(){
 if(!unlocked) return;
@@ -1576,8 +1595,13 @@ var seatModalDesk = null;
 function openSeatModal(deskNum){
 seatModalDesk = deskNum;
 var g = state.zones[deskNum];
-var candidates = state.students.filter(function(s){return s.g===g && s.hadir;}).sort(function(a,b){return a.no-b.no;}).map(function(s){return s.no+'. '+s.name;});
 var occupants = state.assignments[deskNum] || [];
+var free = {};
+unseatedList().forEach(function(s){ free[s.no+'. '+s.name] = 1; });
+var candidates = state.students.filter(function(s){
+var lb = s.no+'. '+s.name;
+return s.g===g && s.hadir && (free[lb] || occupants.indexOf(lb)!==-1);
+}).sort(function(a,b){return a.no-b.no;}).map(function(s){return s.no+'. '+s.name;});
 document.getElementById('seatModalTitle').textContent = 'Atur Meja '+deskNum;
 fillSeatSelect('seatSelectA', candidates, occupants[0]||'');
 fillSeatSelect('seatSelectB', candidates, occupants[1]||'');
@@ -2217,27 +2241,96 @@ setInterval(checkScheduleAlarm, 15000);
 checkScheduleAlarm();
 initAudioContext();
 // backend sync
+var SEAT_KEY = "xe11-seating-v1";
+var saveQ = {busy:false, seat:false, dirty:false, histDirty:false, failed:false, p:null, retry:null};
+function setBadge(kind){
+var el = document.getElementById('syncBadge'); if(!el) return;
+if(kind==='busy'){ el.className='status-msg'; el.textContent='⏳ Mengunggah...'; }
+else if(kind==='ok'){ el.className='status-msg ok'; el.textContent='✓ Sudah terupload ke semua siswa ('+new Date().toLocaleTimeString('id-ID')+')'; }
+else if(kind==='fail'){ el.className='status-msg error'; el.textContent='⚠ Gagal upload. Akan dicoba lagi otomatis — atau tekan tombol Upload.'; }
+else { el.textContent=''; }
+}
+function postKey(key, obj){
+return fetch(BACKEND_URL+'?key='+encodeURIComponent(key), {
+method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(obj)
+}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.text(); });
+}
+function seatingPayload(){ return {zones:state.zones, assignments:state.assignments, students:state.students, ts:Date.now()}; }
+function hasPendingSave(){ return saveQ.busy || saveQ.dirty || saveQ.histDirty || saveQ.failed; }
+// Antrian kirim: satu per satu, selalu kirim data TERBARU, jadi urutan tidak bisa tertukar.
+function flushSaves(){
+if(saveQ.busy) return saveQ.p.then(flushSaves);
+if(!saveQ.dirty && !saveQ.histDirty) return Promise.resolve(!saveQ.failed);
+saveQ.busy = true;
+var doState = saveQ.dirty, doHist = saveQ.histDirty, doSeat = saveQ.seat;
+saveQ.seat = false; saveQ.dirty = false; saveQ.histDirty = false;
+if(unlocked) setBadge('busy');
+var chain = Promise.resolve();
+if(doState){
+if(doSeat) chain = chain.then(function(){ return postKey(SEAT_KEY, seatingPayload()); });
+chain = chain.then(function(){ return postKey(SHARED_KEY, state); });
+}
+if(doHist) chain = chain.then(function(){ return postKey(HIST_KEY, history); });
+saveQ.p = chain.then(function(){ saveQ.failed = false; }).catch(function(){
+saveQ.failed = true; if(doSeat) saveQ.seat = true; if(doState) saveQ.dirty = true; if(doHist) saveQ.histDirty = true;
+}).then(function(){
+saveQ.busy = false;
+if(saveQ.failed){
+if(unlocked) setBadge('fail');
+if(!saveQ.retry){ saveQ.retry = setTimeout(function(){ saveQ.retry = null; flushSaves(); }, 5000); }
+return false;
+}
+if(saveQ.dirty || saveQ.histDirty) return flushSaves();
+if(unlocked) setBadge('ok');
+return true;
+});
+return saveQ.p;
+}
 function save(){
 if(!BACKEND_URL) return;
-fetch(BACKEND_URL+'?key='+encodeURIComponent(SHARED_KEY), {
-method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(state)
-}).catch(function(){});
+saveQ.dirty = true; if(unlocked) saveQ.seat = true;
+flushSaves();
 }
 function saveHistory(){
 if(!BACKEND_URL) return;
-fetch(BACKEND_URL+'?key='+encodeURIComponent(HIST_KEY), {
-method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(history)
-}).catch(function(){});
+saveQ.histDirty = true;
+flushSaves();
 }
+function uploadNow(){
+if(!unlocked || !BACKEND_URL) return;
+saveQ.dirty = true; saveQ.seat = true; saveQ.histDirty = true;
+if(saveQ.retry){ clearTimeout(saveQ.retry); saveQ.retry = null; }
+showStatus('statusMsgDenah','Mengunggah hasil terbaru...','');
+flushSaves().then(function(ok){
+if(!ok) throw new Error('post');
+// cek ulang ke server: pastikan yang tersimpan sama dengan yang di layar admin
+return fetch(BACKEND_URL+'?key='+encodeURIComponent(SEAT_KEY)+'&_='+Date.now()).then(function(r){return r.text();}).then(function(t){
+var sv = JSON.parse(t);
+if(JSON.stringify(sv.assignments)!==JSON.stringify(state.assignments) || JSON.stringify(sv.zones)!==JSON.stringify(state.zones)) throw new Error('mismatch');
+});
+}).then(function(){
+showStatus('statusMsgDenah','Berhasil! Semua siswa akan melihat susunan terbaru dalam beberapa detik.','ok');
+}).catch(function(){
+showStatus('statusMsgDenah','Upload belum terkonfirmasi. Cek internet lalu tekan tombol Upload lagi.','error');
+});
+}
+function parseJSONSafe(t){ if(!t) return null; try{ return JSON.parse(t); }catch(e){ return null; } }
 function refreshFromShared(showMsg){
 if(!BACKEND_URL) return;
+if(unlocked && hasPendingSave()){
+if(showMsg) showStatus('statusMsgDenah','Ada perubahan yang belum terupload. Tekan "Upload hasil terbaru" dulu supaya tidak tertimpa.','error');
+return;
+}
+if(!unlocked && (saveQ.busy || saveQ.dirty)) return;
+var q = '&_='+Date.now();
 Promise.all([
-fetch(BACKEND_URL+'?key='+encodeURIComponent(SHARED_KEY)).then(function(r){return r.text();}).catch(function(){return '';}),
-fetch(BACKEND_URL+'?key='+encodeURIComponent(HIST_KEY)).then(function(r){return r.text();}).catch(function(){return '';})
+fetch(BACKEND_URL+'?key='+encodeURIComponent(SHARED_KEY)+q).then(function(r){return r.text();}).catch(function(){return '';}),
+fetch(BACKEND_URL+'?key='+encodeURIComponent(HIST_KEY)+q).then(function(r){return r.text();}).catch(function(){return '';}),
+fetch(BACKEND_URL+'?key='+encodeURIComponent(SEAT_KEY)+q).then(function(r){return r.text();}).catch(function(){return '';})
 ]).then(function(res){
-var sTxt = res[0], hTxt = res[1];
-if(sTxt){
-var s = JSON.parse(sTxt);
+if(hasPendingSave()) return; // ada perubahan lokal yang belum terkirim, jangan ditimpa
+var s = parseJSONSafe(res[0]), h = parseJSONSafe(res[1]), seat = parseJSONSafe(res[2]);
+if(s){
 state.students = s.students || state.students;
 state.zones = s.zones || state.zones;
 state.assignments = s.assignments || {};
@@ -2249,9 +2342,15 @@ state.spinItems = s.spinItems || state.spinItems;
 state.spinCfg = s.spinCfg || state.spinCfg;
 state.spinLast = s.spinLast || state.spinLast;
 state.polls = s.polls || state.polls;
-syncGroupControlsUI();
 }
-if(hTxt){ history = JSON.parse(hTxt) || []; }
+// Data denah resmi dari admin (kunci khusus) selalu menang
+if(seat && seat.zones && seat.assignments){
+state.zones = seat.zones;
+state.assignments = seat.assignments;
+if(seat.students) state.students = seat.students;
+}
+if(s) syncGroupControlsUI();
+if(h && Array.isArray(h)){ history = h; }
 renderStudents(); renderDesks(); renderGroups(); renderHistory();
 renderInfo(); renderCountdowns(); renderTasks(); updateDashboard();
 renderExtra();
@@ -2320,6 +2419,7 @@ function setEditUI(on){
 document.getElementById('manageCard').style.display = on?'':'none';
 document.getElementById('editActions').style.display = on?'':'none';
 document.getElementById('editActions2').style.display = on?'':'none';
+document.getElementById('editUploadRow').style.display = on?'flex':'none';
 document.getElementById('settingsCard').style.display = on?'':'none';
 document.getElementById('infoAddCard').style.display = on?'':'none';
 document.getElementById('cdAddCard').style.display = on?'':'none';
@@ -2955,6 +3055,7 @@ document.getElementById('btnShufflePositions').addEventListener('click', shuffle
 document.getElementById('btnRandomAll').addEventListener('click', function(){ randomizeZones(); rollSeats(); });
 document.getElementById('btnRandomZone').addEventListener('click', randomizeZones);
 document.getElementById('btnResetZone').addEventListener('click', resetZones);
+document.getElementById('btnUploadNow').addEventListener('click', uploadNow);
 document.getElementById('btnRefreshDenah').addEventListener('click', function(){ refreshFromShared(true); });
 document.getElementById('btnRefreshKelompok').addEventListener('click', function(){ refreshFromShared(true); });
 document.getElementById('btnRollGroup').addEventListener('click', rollGroups);
