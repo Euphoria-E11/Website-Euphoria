@@ -2606,23 +2606,37 @@ var girls = shuffle(presentByGender('P'));
 var n = groupCountSel;
 var groups = [];
 for(var i=0;i<n;i++) groups.push([]);
+var pool;
 if(groupModeSel==='L'){
 if(!boys.length){ showStatus('statusMsgKelompok','Tidak ada siswa laki-laki yang hadir.','error'); return; }
-boys.forEach(function(name,i){ groups[i%n].push(name); });
+pool = boys;
 } else if(groupModeSel==='P'){
 if(!girls.length){ showStatus('statusMsgKelompok','Tidak ada siswa perempuan yang hadir.','error'); return; }
-girls.forEach(function(name,i){ groups[i%n].push(name); });
+pool = girls;
 } else {
 if(!boys.length && !girls.length){ showStatus('statusMsgKelompok','Tidak ada siswa yang hadir.','error'); return; }
-boys.forEach(function(name,i){ groups[i%n].push(name); });
-girls.forEach(function(name,i){ groups[i%n].push(name); });
+pool = boys.concat(girls);
 }
+// Bagi sama rata. Kalau tidak habis dibagi, sisa siswa ditambahkan satu-satu ke beberapa kelompok (dipilih acak).
+var base = Math.floor(pool.length / n), extra = pool.length % n;
+var cap = [];
+for(var c=0;c<n;c++) cap.push(base);
+var order = []; for(var o=0;o<n;o++) order.push(o);
+shuffle(order).slice(0, extra).forEach(function(k){ cap[k]++; });
+var gi = 0;
+pool.forEach(function(name){
+var guard = 0;
+while(groups[gi].length >= cap[gi] && guard++ < n) gi = (gi+1) % n;
+groups[gi].push(name);
+gi = (gi+1) % n;
+});
+var sizeInfo = extra===0 ? (n+' kelompok x '+base+' siswa') : ((n-extra)+' kelompok x '+base+' siswa, '+extra+' kelompok x '+(base+1)+' siswa');
 state.groupsBySubject[currentSubject] = {
 mode: groupModeSel, count: groupCountSel, groups: groups,
 time: new Date().toLocaleString('id-ID')
 };
 save(); renderGroups();
-showStatus('statusMsgKelompok', 'Kelompok untuk '+currentSubject+' berhasil diacak!', 'ok');
+showStatus('statusMsgKelompok', 'Kelompok untuk '+currentSubject+' berhasil diacak! ('+sizeInfo+')', 'ok');
 }
 function syncGroupControlsUI(){
 var data = getSubjectData();
